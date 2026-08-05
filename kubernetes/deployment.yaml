@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: poc1-deployment
+  namespace: poc1
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: poc1
+
+  template:
+    metadata:
+      labels:
+        app: poc1
+
+    spec:
+      containers:
+      - name: website
+
+        image: nivedhapm/poc1:latest
+
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: 80
