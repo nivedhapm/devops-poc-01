@@ -38,7 +38,8 @@ pipeline {
             steps {
                 sh '''
                 docker build \
-                -t ${IMAGE_NAME}:${IMAGE_TAG} \
+                -t nivedhapm/poc1:latest \
+                -t nivedhapm/poc1:build-${BUILD_NUMBER} \
                 -f docker/Dockerfile .
                 '''
             }
@@ -49,6 +50,29 @@ pipeline {
                 sh '''
                 docker images
                 '''
+            }
+        }
+
+        stage('Push Image to Docker Hub') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                    docker push nivedhapm/poc1:latest   
+
+                    docker push nivedhapm/poc1:build-${BUILD_NUMBER}
+
+                    docker logout
+                    '''
+                }
             }
         }
 
