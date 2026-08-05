@@ -1,69 +1,69 @@
 pipeline {
+
     agent any
+
+    environment {
+        IMAGE_NAME = "devops-poc-01"
+        IMAGE_TAG = "build-${BUILD_NUMBER}"
+    }
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Source') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Git') {
+        stage('Verify Project Structure') {
             steps {
-                sh 'git --version'
+                sh '''
+                echo "Checking project structure..."
+                ls -R
+                '''
             }
         }
 
-        stage('Java') {
+        stage('Verify Website Files') {
             steps {
-                sh 'java -version'
-                sh 'javac -version'
+                sh '''
+                test -f website/index.html
+                test -f website/style.css
+                echo "Website files verified."
+                '''
             }
         }
 
-        stage('Maven') {
+        stage('Build Docker Image') {
             steps {
-                sh 'mvn -version'
+                sh '''
+                docker build \
+                -t ${IMAGE_NAME}:${IMAGE_TAG} \
+                -f docker/Dockerfile .
+                '''
             }
         }
 
-        stage('Docker') {
+        stage('List Docker Images') {
             steps {
-                sh 'docker --version'
-                sh 'docker info'
+                sh '''
+                docker images
+                '''
             }
         }
 
-        stage('kubectl') {
-            steps {
-                sh 'kubectl version --client'
-                sh 'kubectl get nodes'
-            }
-        }
-
-        stage('Helm') {
-            steps {
-                sh 'helm version'
-            }
-        }
-
-        stage('Kubernetes Health') {
-            steps {
-                sh 'kubectl cluster-info'
-                sh 'kubectl get nodes'
-                sh 'kubectl get pods -A'
-            }
-        }
     }
 
     post {
+
         success {
-            echo 'DevOps Platform Verification Successful!!'
+            echo 'Pipeline completed successfully.'
         }
 
         failure {
-            echo 'Platform Verification Failed.'
+            echo 'Pipeline failed.'
         }
+
     }
+
 }
