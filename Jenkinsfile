@@ -76,6 +76,42 @@ pipeline {
             }
         }
 
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                echo "Deploying application to Kubernetes..."
+
+                kubectl apply -f kubernetes/namespace.yaml
+
+                kubectl apply -f kubernetes/deployment.yaml
+
+                kubectl apply -f kubernetes/service.yaml
+                '''
+            }
+        }
+
+        stage('Wait for Rollout') {
+            steps {
+                sh '''
+                echo "Waiting for deployment rollout..."
+
+                kubectl rollout status deployment/poc1-deployment -n poc1
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                echo "Verifying deployed Pods..."
+
+                kubectl get pods -n poc1
+
+                kubectl get svc -n poc1
+                '''
+            }
+        }
+
     }
 
     post {
