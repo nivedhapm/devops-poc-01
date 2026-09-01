@@ -86,6 +86,10 @@ pipeline {
                 kubectl apply -f kubernetes/deployment.yaml
 
                 kubectl apply -f kubernetes/service.yaml
+                
+                kubectl set image deployment/poc1-deployment \
+                website=nivedhapm/poc1:build-${BUILD_NUMBER} \
+                -n poc1
                 '''
             }
         }
@@ -108,9 +112,6 @@ pipeline {
                 kubectl get pods -n poc1
 
                 kubectl get svc -n poc1
-                kubectl set image deployment/poc1-deployment \
-                website=nivedhapm/poc1:build-${BUILD_NUMBER} \
-                -n poc1
                 '''
             }
         }
